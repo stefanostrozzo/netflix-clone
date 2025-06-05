@@ -1,0 +1,82 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Services\TmdbService;
+use Illuminate\Support\Facades\Log;
+
+class MovieController extends Controller
+{
+    protected $tmdbService;
+
+    // Inietta il servizio tramite Dependency Injection
+    public function __construct(TmdbService $tmdbService)
+    {
+        $this->tmdbService = $tmdbService;
+    }
+
+    /**
+     * Mostra una lista di film popolari.
+     */
+    public function index(Request $request)
+    {
+        $page = $request->query('page', 1); // Ottieni il numero di pagina dalla query string, default a 1
+
+        try {
+            $moviesData = $this->tmdbService->getPopularMovies($page);
+
+            // La risposta conterrà 'results' (i film), 'page', 'total_pages', 'total_results'
+            $movies = $moviesData['results'] ?? [];
+            $totalPages = $moviesData['total_pages'] ?? 1;
+
+            return view('movies.index', compact('movies', 'page', 'totalPages'));
+
+        } catch (\Exception $e) {
+            // Gestione degli errori: logga l'erroore, reindirizza o mostra un messaggio
+            Log::error("Errore nel recupero film popolari: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Impossibile recuperare i film al momento. Riprova più tardi.');
+        }
+    }
+
+    /**
+     * Mostra i dettagli di un singolo film.
+     * Questo richiede un endpoint nel TmdbService per recuperare i dettagli del film.
+     */
+    public function show($id)
+    {
+        try {
+            // Dovrai aggiungere un metodo getMovieDetails($id) nel tuo TmdbService
+            $movie = $this->tmdbService->getMovieDetails($id);
+
+            if (!$movie) {
+                abort(404, 'Film non trovato.');
+            }
+
+            return view('movies.show', compact('movie'));
+
+        } catch (\Exception $e) {
+            Log::error("Errore nel recupero dettagli film (ID: {$id}): " . $e->getMessage());
+            return redirect()->back()->with('error', 'Impossibile recuperare i dettagli del film.');
+        }
+    }
+
+    /**
+     * Mostra una lista di film con i voti più alti.
+     */
+    public function topRated(Request $request)
+    {
+        $page = $request->query('page', 1);
+
+        try {
+            $moviesData = $this->tmdbService->getTopRatedMovies($page);
+            $movies = $moviesData['results'] ?? [];
+            $totalPages = $moviesData['total_pages'] ?? 1;
+
+            return view('movies.top_rated', compact('movies', 'page', 'totalPages'));
+        } catch (\Exception $e) {
+            Log::error("Errore nel recupero film più votati: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Impossibile recuperare i film al momento.');
+        }
+    }
+}
