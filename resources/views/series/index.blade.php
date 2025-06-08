@@ -1,7 +1,7 @@
 @extends('layout')
 @section('content')
     <div class="container mx-auto p-4">
-        <h1 class="text-3xl font-bold mb-6 text-center">Film per Categoria</h1>
+        <h1 class="text-3xl font-bold mb-6 text-center">Serie TV per Categoria</h1>
         @if (session('error'))
             <div class="bg-red-500 text-white p-3 rounded mb-4">
                 {{ session('error') }}

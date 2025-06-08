@@ -14,8 +14,8 @@
             <div class="container mx-auto flex justify-between items-center">
                 <a href="{{ url('/') }}" class="text-white text-2xl font-bold">Netflix Clone</a>
                 <div>
-                    <a href="{{ route('movies.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Film Popolari</a>
-                    <a href="{{ route('movies.top_rated') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Film Più Votati</a>
+                    <a href="{{ route('movies.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Film</a>
+                    <a href="{{ route('series.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Serie TV</a>
                     {{-- Puoi aggiungere altri link qui --}}
                 </div>
             </div>

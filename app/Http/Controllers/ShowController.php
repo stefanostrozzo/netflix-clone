@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\TmdbService;
 use Illuminate\Support\Facades\Log;
 
-class MovieController extends Controller
+class ShowController extends Controller
 {
     protected $tmdbService;
 
@@ -21,21 +21,28 @@ class MovieController extends Controller
      */
     public function index(Request $request)
     {
-        $page = $request->query('page', 1); // Ottieni il numero di pagina dalla query string, default a 1
+        $page = $request->query('page', 1);
 
         try {
-            $moviesData = $this->tmdbService->getPopularMovies($page);
+            $genres = $this->tmdbService->getShowGenres();
+            $showsByGenre = [];
 
-            // La risposta conterrà 'results' (i film), 'page', 'total_pages', 'total_results'
-            $movies = $moviesData['results'] ?? [];
-            $totalPages = $moviesData['total_pages'] ?? 1;
+            if($genres) {
+                foreach($genres as $genre) {
+                    $showsData = $this->tmdbService->getShowFromGenre($genre['id']);
+                    if ($showsData && isset($showsData['results'])) {
+                        $showsByGenre[$genre['name']] = $showsData['results'];
+                    }
+                }
+            }
 
-            return view('movies.index', compact('movies', 'page', 'totalPages'));
+            $totalPages = 1;
+
+            return view('series.index', compact('showsByGenre', 'page', 'totalPages', 'genres'));
 
         } catch (\Exception $e) {
-            // Gestione degli errori: logga l'erroore, reindirizza o mostra un messaggio
-            Log::error("Errore nel recupero film popolari: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Impossibile recuperare i film al momento. Riprova più tardi.');
+            Log::error("Errore nel recupero film: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Impossibile recuperare le serie al momento. Riprova più tardi.');
         }
     }
 
@@ -58,25 +65,6 @@ class MovieController extends Controller
         } catch (\Exception $e) {
             Log::error("Errore nel recupero dettagli film (ID: {$id}): " . $e->getMessage());
             return redirect()->back()->with('error', 'Impossibile recuperare i dettagli del film.');
-        }
-    }
-
-    /**
-     * Mostra una lista di film con i voti più alti.
-     */
-    public function topRated(Request $request)
-    {
-        $page = $request->query('page', 1);
-
-        try {
-            $moviesData = $this->tmdbService->getTopRatedMovies($page);
-            $movies = $moviesData['results'] ?? [];
-            $totalPages = $moviesData['total_pages'] ?? 1;
-
-            return view('movies.top_rated', compact('movies', 'page', 'totalPages'));
-        } catch (\Exception $e) {
-            Log::error("Errore nel recupero film più votati: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Impossibile recuperare i film al momento.');
         }
     }
 }
