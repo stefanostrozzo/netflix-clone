@@ -4,6 +4,7 @@ namespace App\Services; // Assicurati che il namespace sia corretto
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class TmdbService
 {
@@ -27,41 +28,38 @@ class TmdbService
         return $response->json();
     }
 
-    public function getTopRatedMovies(int $page = 1)
+    public function getMovieGenres()
     {
-        $response = Http::get("{$this->baseUrl}/movie/top_rated", [
+        $genres = [];
+        $response = Http::get("{$this->baseUrl}/genre/movie/list?language=it", [
             'api_key' => $this->apiKey,
             'language' => 'it-IT',
-            'page' => $page,
         ]);
 
-        return $response->json();
+        if($response->successful() && isset($response['genres'])) {
+            return $response['genres'];
+        }
+
+        return [];
     }
 
-    public function discoverMovies(array $params = [], int $page = 1)
+    public function getMovieFromGenre(string $genreId)
     {
-        $defaultParams = [
+        $response = Http::get("{$this->baseUrl}/discover/movie", [
             'api_key' => $this->apiKey,
             'language' => 'it-IT',
+            'with_genres' => $genreId,
             'sort_by' => 'popularity.desc',
             'include_adult' => false,
             'include_video' => false,
-            'page' => $page,
-        ];
-
-        $response = Http::get("{$this->baseUrl}/discover/movie", array_merge($defaultParams, $params));
-
-        return $response->json();
-    }
-
-    public function getMovieGenres()
-    {
-        $response = Http::get("{$this->baseUrl}/genre/movie/list", [
-            'api_key' => $this->apiKey,
-            'language' => 'it-IT',
+            'page' => 1
         ]);
 
-        return $response->json();
+        if ($response->successful() && $response->json()) {
+            return $response->json();
+        }
+
+        return null;
     }
 
     public function getMovieDetails(int $id)
@@ -71,11 +69,10 @@ class TmdbService
             'language' => 'it-IT',
         ]);
 
-        // Controlla se la richiesta è andata a buon fine e la risposta contiene dati
         if ($response->successful() && $response->json()) {
             return $response->json();
         }
 
-        return null; // O lancia un'eccezione
+        return null;
     }
 }
