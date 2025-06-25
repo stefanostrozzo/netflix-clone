@@ -23,60 +23,70 @@
             </div>
         @endif
 
-        @foreach($genres as $genre)
-            <div class="mb-8 relative group">
-                <h2 class="text-2xl font-bold mb-4 text-red-500">{{ $genre['name'] }}</h2>
-                
-                <!-- Pulsante Sinistro -->
-                <button onclick="scrollLeft('{{ $genre['name'] }}')" 
-                        class="absolute left-0 top-1/2 -translate-y-1/2 bg-black/80 hover:bg-red-600 text-white p-4 rounded-r-lg z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
+        <!-- Indicatore di caricamento -->
+        <div id="loading-indicator" class="text-center py-8 hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+            <p class="text-gray-400 mt-2">Caricamento serie TV...</p>
+        </div>
 
-                <!-- Container Film con Scrollbar Nascosta -->
-                <div id="scroll-{{ $genre['name'] }}" class="flex overflow-x-auto space-x-4 pb-4 scrollbar-hide">
-                    @forelse($showsByGenre[$genre['name']] ?? [] as $show)
-                        <div class="flex-none w-64 bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                            @if ($show['poster_path'])
-                                <a href="{{ route('series.show', $show['id']) }}">
-                                    <img src="https://image.tmdb.org/t/p/w500{{ $show['poster_path'] }}" 
-                                         alt="{{ $show['name'] }}" 
-                                         class="w-full h-96 object-cover">
-                                </a>
-                            @else
-                                <div class="w-full h-96 bg-gray-700 flex items-center justify-center text-gray-400">
-                                    Nessuna immagine
-                                </div>
-                            @endif
-                            <div class="p-4">
-                                <h3 class="text-lg font-semibold mb-2 text-white">{{ $show['name'] }}</h3>
-                                @if (isset($show['release_date']) && $show['release_date'])
-                                    <p class="text-gray-400 text-sm mb-2">
-                                        {{ \Carbon\Carbon::parse($show['release_date'])->format('d/m/Y') }}
-                                    </p>
+        <!-- Contenuto principale -->
+        <div id="content-container">
+            @foreach($genres as $genre)
+                <div class="mb-8 relative group">
+                    <h2 class="text-2xl font-bold mb-4 text-red-500">{{ $genre['name'] }}</h2>
+                    
+                    <!-- Pulsante Sinistro -->
+                    <button onclick="scrollLeft('{{ $genre['name'] }}')" 
+                            class="absolute left-0 top-1/2 -translate-y-1/2 bg-black/80 hover:bg-red-600 text-white p-4 rounded-r-lg z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <!-- Container Film con Scrollbar Nascosta -->
+                    <div id="scroll-{{ $genre['name'] }}" class="flex overflow-x-auto space-x-4 pb-4 scrollbar-hide">
+                        @forelse($showsByGenre[$genre['name']] ?? [] as $show)
+                            <div class="flex-none w-64 bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:transform hover:scale-105 transition-transform duration-300">
+                                @if ($show['poster_path'])
+                                    <a href="{{ route('series.show', $show['id']) }}">
+                                        <img src="https://image.tmdb.org/t/p/w500{{ $show['poster_path'] }}" 
+                                             alt="{{ $show['name'] }}" 
+                                             class="w-full h-96 object-cover"
+                                             loading="lazy">
+                                    </a>
+                                @else
+                                    <div class="w-full h-96 bg-gray-700 flex items-center justify-center text-gray-400">
+                                        Nessuna immagine
+                                    </div>
                                 @endif
-                                <a href="{{ route('series.show', $show['id']) }}" 
-                                   class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center block mt-2">
-                                    Dettagli
-                                </a>
+                                <div class="p-4">
+                                    <h3 class="text-lg font-semibold mb-2 text-white">{{ $show['name'] }}</h3>
+                                    @if (isset($show['release_date']) && $show['release_date'])
+                                        <p class="text-gray-400 text-sm mb-2">
+                                            {{ \Carbon\Carbon::parse($show['release_date'])->format('d/m/Y') }}
+                                        </p>
+                                    @endif
+                                    <a href="{{ route('series.show', $show['id']) }}" 
+                                       class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center block mt-2">
+                                        Dettagli
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    @empty
-                        <p class="text-gray-400">Nessuna serie trovata per questa categoria.</p>
-                    @endforelse
-                </div>
+                        @empty
+                            <p class="text-gray-400">Nessuna serie trovata per questa categoria.</p>
+                        @endforelse
+                    </div>
 
-                <!-- Pulsante Destro -->
-                <button onclick="scrollRight('{{ $genre['name'] }}')" 
-                        class="absolute right-0 top-1/2 -translate-y-1/2 bg-black/80 hover:bg-red-600 text-white p-4 rounded-l-lg z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
-            </div>
-        @endforeach
+                    <!-- Pulsante Destro -->
+                    <button onclick="scrollRight('{{ $genre['name'] }}')" 
+                            class="absolute right-0 top-1/2 -translate-y-1/2 bg-black/80 hover:bg-red-600 text-white p-4 rounded-l-lg z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg hover:scale-110">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            @endforeach
+        </div>
 
         <div class="flex justify-center mt-8 space-x-4">
             @if ($page > 1)

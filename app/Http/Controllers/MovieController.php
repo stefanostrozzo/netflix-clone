@@ -24,7 +24,8 @@ class MovieController extends Controller
         $page = $request->query('page', 1);
 
         try {
-            $genres = $this->tmdbService->getMovieGenres();
+            // Usiamo solo i generi più popolari per migliorare le performance
+            $genres = $this->tmdbService->getPopularMovieGenres();
             $moviesByGenre = [];
 
             if($genres) {

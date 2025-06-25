@@ -24,7 +24,8 @@ class ShowController extends Controller
         $page = $request->query('page', 1);
 
         try {
-            $genres = $this->tmdbService->getShowGenres();
+            // Usiamo solo i generi più popolari per migliorare le performance
+            $genres = $this->tmdbService->getPopularShowGenres();
             $showsByGenre = [];
 
             if($genres) {
