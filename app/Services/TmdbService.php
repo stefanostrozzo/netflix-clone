@@ -17,17 +17,6 @@ class TmdbService
         $this->baseUrl = config('services.tmdb.base_url');
     }
 
-    public function getPopularMovies(int $page = 1)
-    {
-        $response = Http::get("{$this->baseUrl}/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc", [
-            'api_key' => $this->apiKey,
-            'language' => 'it-IT',
-            'page' => $page,
-        ]);
-
-        return $response->json();
-    }
-
     public function getMovieGenres()
     {
         $response = Http::get("{$this->baseUrl}/genre/movie/list?language=it", [
@@ -65,7 +54,8 @@ class TmdbService
             'sort_by' => 'popularity.desc',
             'include_adult' => false,
             'include_video' => false,
-            'page' => 1
+            'page' => 1,
+            'per_page' => 10 // Limitiamo a 10 film per categoria
         ]);
 
         if ($response->successful() && $response->json()) {
@@ -77,18 +67,18 @@ class TmdbService
 
     public function getShowFromGenre(string $genreId)
     {
-        dd($genreId);
         $response = Http::get("{$this->baseUrl}/discover/tv", [
             'api_key' => $this->apiKey,
             'language' => 'it-IT',
             'with_genres' => $genreId,
             'sort_by' => 'popularity.desc',
             'include_adult' => false,
-            'include_video' => false,
-            'page' => 1
+            'page' => 1,
+            'per_page' => 10 // Limitiamo a 10 serie per categoria
         ]);
 
         if ($response->successful() && $response->json()) {
+            // Log::info('TMDb API call successful', ['status' => $response->status(), 'body' => $response->json()]);
             return $response->json();
         }
 
@@ -100,6 +90,40 @@ class TmdbService
         $response = Http::get("{$this->baseUrl}/movie/{$id}", [
             'api_key' => $this->apiKey,
             'language' => 'it-IT',
+        ]);
+
+        if ($response->successful() && $response->json()) {
+            return $response->json();
+        }
+
+        return null;
+    }
+
+    public function searchMovies(string $query, int $page = 1)
+    {
+        $response = Http::get("{$this->baseUrl}/search/movie", [
+            'api_key' => $this->apiKey,
+            'language' => 'it-IT',
+            'query' => $query,
+            'page' => $page,
+            'include_adult' => false,
+        ]);
+
+        if ($response->successful() && $response->json()) {
+            return $response->json();
+        }
+
+        return null;
+    }
+
+    public function searchShows(string $query, int $page = 1)
+    {
+        $response = Http::get("{$this->baseUrl}/search/tv", [
+            'api_key' => $this->apiKey,
+            'language' => 'it-IT',
+            'query' => $query,
+            'page' => $page,
+            'include_adult' => false,
         ]);
 
         if ($response->successful() && $response->json()) {

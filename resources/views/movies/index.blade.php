@@ -2,6 +2,21 @@
 @section('content')
     <div class="container mx-auto p-4">
         <h1 class="text-3xl font-bold mb-6 text-center">Film per Categoria</h1>
+        
+        <!-- Form di ricerca -->
+        <div class="max-w-md mx-auto mb-8">
+            <form action="{{ route('movies.search') }}" method="GET" class="flex">
+                <input type="text" 
+                       name="q" 
+                       placeholder="Cerca un film..." 
+                       class="flex-1 px-4 py-3 border border-gray-600 rounded-l-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500">
+                <button type="submit" 
+                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-r-lg transition-colors duration-200">
+                    🔍 Cerca
+                </button>
+            </form>
+        </div>
+
         @if (session('error'))
             <div class="bg-red-500 text-white p-3 rounded mb-4">
                 {{ session('error') }}

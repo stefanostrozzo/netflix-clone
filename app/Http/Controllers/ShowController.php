@@ -41,7 +41,7 @@ class ShowController extends Controller
             return view('series.index', compact('showsByGenre', 'page', 'totalPages', 'genres'));
 
         } catch (\Exception $e) {
-            Log::error("Errore nel recupero film: " . $e->getMessage());
+            Log::error("Errore nel recupero della serie: " . $e->getMessage());
             return redirect()->back()->with('error', 'Impossibile recuperare le serie al momento. Riprova più tardi.');
         }
     }
@@ -57,14 +57,51 @@ class ShowController extends Controller
             $movie = $this->tmdbService->getMovieDetails($id);
 
             if (!$movie) {
-                abort(404, 'Film non trovato.');
+                abort(404, 'Serie non trovato.');
             }
 
             return view('movies.show', compact('movie'));
 
         } catch (\Exception $e) {
-            Log::error("Errore nel recupero dettagli film (ID: {$id}): " . $e->getMessage());
-            return redirect()->back()->with('error', 'Impossibile recuperare i dettagli del film.');
+            Log::error("Errore nel recupero dettagli della serie (ID: {$id}): " . $e->getMessage());
+            return redirect()->back()->with('error', 'Impossibile recuperare i dettagli della serie.');
+        }
+    }
+
+    /**
+     * Cerca serie TV per nome.
+     */
+    public function search(Request $request)
+    {
+        $query = $request->query('q', '');
+        $page = $request->query('page', 1);
+
+        if (empty($query)) {
+            return redirect()->route('series.index');
+        }
+
+        try {
+            $searchResults = $this->tmdbService->searchShows($query, $page);
+            
+            if (!$searchResults) {
+                return view('series.search', [
+                    'shows' => [],
+                    'query' => $query,
+                    'page' => $page,
+                    'totalPages' => 0,
+                    'totalResults' => 0
+                ]);
+            }
+
+            $shows = $searchResults['results'] ?? [];
+            $totalPages = min($searchResults['total_pages'] ?? 0, 500); // TMDb limita a 500 pagine
+            $totalResults = $searchResults['total_results'] ?? 0;
+
+            return view('series.search', compact('shows', 'query', 'page', 'totalPages', 'totalResults'));
+
+        } catch (\Exception $e) {
+            Log::error("Errore nella ricerca serie TV: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Impossibile eseguire la ricerca al momento. Riprova più tardi.');
         }
     }
 }

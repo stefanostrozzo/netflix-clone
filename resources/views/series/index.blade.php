@@ -2,6 +2,21 @@
 @section('content')
     <div class="container mx-auto p-4">
         <h1 class="text-3xl font-bold mb-6 text-center">Serie TV per Categoria</h1>
+        
+        <!-- Form di ricerca -->
+        <div class="max-w-md mx-auto mb-8">
+            <form action="{{ route('series.search') }}" method="GET" class="flex">
+                <input type="text" 
+                       name="q" 
+                       placeholder="Cerca una serie TV..." 
+                       class="flex-1 px-4 py-3 border border-gray-600 rounded-l-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500">
+                <button type="submit" 
+                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-r-lg transition-colors duration-200">
+                    📺 Cerca
+                </button>
+            </form>
+        </div>
+
         @if (session('error'))
             <div class="bg-red-500 text-white p-3 rounded mb-4">
                 {{ session('error') }}
@@ -22,12 +37,12 @@
 
                 <!-- Container Film con Scrollbar Nascosta -->
                 <div id="scroll-{{ $genre['name'] }}" class="flex overflow-x-auto space-x-4 pb-4 scrollbar-hide">
-                    @forelse($moviesByGenre[$genre['name']] ?? [] as $movie)
+                    @forelse($showsByGenre[$genre['name']] ?? [] as $show)
                         <div class="flex-none w-64 bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                            @if ($movie['poster_path'])
-                                <a href="{{ route('movies.show', $movie['id']) }}">
-                                    <img src="https://image.tmdb.org/t/p/w500{{ $movie['poster_path'] }}" 
-                                         alt="{{ $movie['title'] }}" 
+                            @if ($show['poster_path'])
+                                <a href="{{ route('series.show', $show['id']) }}">
+                                    <img src="https://image.tmdb.org/t/p/w500{{ $show['poster_path'] }}" 
+                                         alt="{{ $show['name'] }}" 
                                          class="w-full h-96 object-cover">
                                 </a>
                             @else
@@ -36,20 +51,20 @@
                                 </div>
                             @endif
                             <div class="p-4">
-                                <h3 class="text-lg font-semibold mb-2 text-white">{{ $movie['title'] }}</h3>
-                                @if (isset($movie['release_date']) && $movie['release_date'])
+                                <h3 class="text-lg font-semibold mb-2 text-white">{{ $show['name'] }}</h3>
+                                @if (isset($show['release_date']) && $show['release_date'])
                                     <p class="text-gray-400 text-sm mb-2">
-                                        {{ \Carbon\Carbon::parse($movie['release_date'])->format('d/m/Y') }}
+                                        {{ \Carbon\Carbon::parse($show['release_date'])->format('d/m/Y') }}
                                     </p>
                                 @endif
-                                <a href="{{ route('movies.show', $movie['id']) }}" 
+                                <a href="{{ route('series.show', $show['id']) }}" 
                                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center block mt-2">
                                     Dettagli
                                 </a>
                             </div>
                         </div>
                     @empty
-                        <p class="text-gray-400">Nessun film trovato per questa categoria.</p>
+                        <p class="text-gray-400">Nessuna serie trovata per questa categoria.</p>
                     @endforelse
                 </div>
 
@@ -65,14 +80,14 @@
 
         <div class="flex justify-center mt-8 space-x-4">
             @if ($page > 1)
-                <a href="{{ route('movies.index', ['page' => $page - 1]) }}" 
+                <a href="{{ route('series.index', ['page' => $page - 1]) }}" 
                    class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
                     Pagina Precedente
                 </a>
             @endif
             <span class="text-lg text-gray-300 self-center">Pagina {{ $page }} di {{ min($totalPages, 500) }}</span>
             @if ($page < $totalPages && $page < 500)
-                <a href="{{ route('movies.index', ['page' => $page + 1]) }}" 
+                <a href="{{ route('series.index', ['page' => $page + 1]) }}" 
                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                     Pagina Successiva
                 </a>

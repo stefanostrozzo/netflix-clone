@@ -67,4 +67,41 @@ class MovieController extends Controller
             return redirect()->back()->with('error', 'Impossibile recuperare i dettagli del film.');
         }
     }
+
+    /**
+     * Cerca film per nome.
+     */
+    public function search(Request $request)
+    {
+        $query = $request->query('q', '');
+        $page = $request->query('page', 1);
+
+        if (empty($query)) {
+            return redirect()->route('movies.index');
+        }
+
+        try {
+            $searchResults = $this->tmdbService->searchMovies($query, $page);
+            
+            if (!$searchResults) {
+                return view('movies.search', [
+                    'movies' => [],
+                    'query' => $query,
+                    'page' => $page,
+                    'totalPages' => 0,
+                    'totalResults' => 0
+                ]);
+            }
+
+            $movies = $searchResults['results'] ?? [];
+            $totalPages = min($searchResults['total_pages'] ?? 0, 500); // TMDb limita a 500 pagine
+            $totalResults = $searchResults['total_results'] ?? 0;
+
+            return view('movies.search', compact('movies', 'query', 'page', 'totalPages', 'totalResults'));
+
+        } catch (\Exception $e) {
+            Log::error("Errore nella ricerca film: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Impossibile eseguire la ricerca al momento. Riprova più tardi.');
+        }
+    }
 }
