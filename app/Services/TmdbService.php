@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\RateLimiter;
 
 class TmdbService
 {
-    protected $apiKey;
-    protected $baseUrl;
+    public $apiKey;
+    public $baseUrl;
     protected $rateLimitKey = 'tmdb_api_calls';
 
     public function __construct()
@@ -308,5 +308,31 @@ class TmdbService
 
         Cache::put($cacheKey, $data, 3600); // 1 ora
         return $data;
+    }
+
+    public function getShowDetails(int $id)
+    {
+        $response = Http::get("{$this->baseUrl}/tv/{$id}", [
+            'api_key' => $this->apiKey,
+            'language' => 'it-IT',
+        ]);
+
+        if ($response->successful() && $response->json()) {
+            return $response->json();
+        }
+
+        return null;
+    }
+
+    public function getSeasonEpisodes(int $showId, int $seasonNumber)
+    {
+        $response = \Illuminate\Support\Facades\Http::get("{$this->baseUrl}/tv/{$showId}/season/{$seasonNumber}", [
+            'api_key' => $this->apiKey,
+            'language' => 'it-IT',
+        ]);
+        if ($response->successful() && isset($response['episodes'])) {
+            return $response['episodes'];
+        }
+        return [];
     }
 }

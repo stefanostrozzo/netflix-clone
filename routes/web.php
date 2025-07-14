@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ShowController;
+use App\Http\Controllers\HomeController;
 
 Route::get('/movies', [MovieController::class, 'index'])->name('movies.index');
 
@@ -19,3 +20,7 @@ Route::get('/shows/search', [ShowController::class, 'search'])->name('series.sea
 
 // Rotta per i dettagli di un singolo film (opzionale, ma consigliato)
 Route::get('/shows/{id}', [ShowController::class, 'show'])->name('series.show');
+
+Route::get('/api/series/{id}/season/{season}', [\App\Http\Controllers\ShowController::class, 'seasonEpisodesApi']);
+
+Route::get('/', [HomeController::class, 'index'])->name('home');

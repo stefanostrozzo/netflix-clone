@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\TmdbService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class ShowController extends Controller
 {
@@ -54,15 +55,17 @@ class ShowController extends Controller
     public function show($id)
     {
         try {
-            // Dovrai aggiungere un metodo getMovieDetails($id) nel tuo TmdbService
-            $movie = $this->tmdbService->getMovieDetails($id);
-
-            if (!$movie) {
-                abort(404, 'Serie non trovato.');
+            $show = $this->tmdbService->getShowDetails($id);
+            if (!$show) {
+                abort(404, 'Serie non trovata.');
             }
-
-            return view('movies.show', compact('movie'));
-
+            $seasons = $show['seasons'] ?? [];
+            $episodes = [];
+            if (!empty($seasons)) {
+                $seasonNumber = $seasons[0]['season_number'];
+                $episodes = $this->tmdbService->getSeasonEpisodes($id, $seasonNumber);
+            }
+            return view('series.show', compact('show', 'seasons', 'episodes'));
         } catch (\Exception $e) {
             Log::error("Errore nel recupero dettagli della serie (ID: {$id}): " . $e->getMessage());
             return redirect()->back()->with('error', 'Impossibile recuperare i dettagli della serie.');
@@ -103,6 +106,17 @@ class ShowController extends Controller
         } catch (\Exception $e) {
             Log::error("Errore nella ricerca serie TV: " . $e->getMessage());
             return redirect()->back()->with('error', 'Impossibile eseguire la ricerca al momento. Riprova più tardi.');
+        }
+    }
+
+    // API per episodi di una stagione
+    public function seasonEpisodesApi($id, $season)
+    {
+        try {
+            $episodes = $this->tmdbService->getSeasonEpisodes($id, $season);
+            return response()->json(['episodes' => $episodes]);
+        } catch (\Exception $e) {
+            return response()->json(['episodes' => []], 500);
         }
     }
 }

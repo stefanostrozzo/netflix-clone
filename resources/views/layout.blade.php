@@ -10,11 +10,11 @@
 
     <header class="navbar fixed top-0 w-full z-50 bg-gradient-to-b from-black to-transparent px-4 md:px-12 py-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <!-- Logo/Brand -->
-            <div class="flex items-center">
-                <h1 class="text-2xl md:text-3xl font-bold text-red-600">CinemaHub</h1>
-            </div>
-            
+            <a href="/">
+                <div class="flex items-center">
+                    <h1 class="text-2xl md:text-3xl font-bold text-red-600">CinemaHub</h1>
+                </div>
+            </a>
             <!-- Navigation Links -->
             <div class="hidden md:flex items-center space-x-6 mr-6">
                 <a href="{{ route('movies.index') }}" class="text-gray-300 hover:text-white transition-colors font-medium flex items-center {{ request()->routeIs('movies.*') ? 'text-red-500 border-b-2 border-red-500' : '' }}">
@@ -51,16 +51,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
-                
-                <!-- Profile -->
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded overflow-hidden bg-red-600 flex items-center justify-center">
-                        <span class="text-xs font-bold">U</span>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </div>
             </div>
         </div>
         
@@ -96,7 +86,7 @@
 
     {{-- Questo è dove il contenuto specifico di ogni vista verrà iniettato --}}
     <main class="min-h-screen">
-        <div class="container-fluid h-100 mx-auto px-4">
+        <div class="container-fluid h-100">
             @if (session('error'))
                 <div class="bg-red-500 text-white p-3 rounded mb-4">
                     {{ session('error') }}
